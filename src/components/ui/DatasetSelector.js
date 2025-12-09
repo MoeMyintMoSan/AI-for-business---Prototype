@@ -1,15 +1,27 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, Database, TrendingUp, Zap, Info } from 'lucide-react'
+import { ChevronDown, Database, TrendingUp, Zap, Info, ShoppingCart, Box, Calendar, Users } from 'lucide-react'
 import { AVAILABLE_DATASETS, getDatasetById } from '../../data/datasets/datasetConfig'
+
+const iconMap = {
+  cart: ShoppingCart,
+  box: Box,
+  calendar: Calendar,
+  users: Users
+}
 
 const DatasetSelector = ({ onDatasetChange, selectedDataset, className = '' }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
 
   const datasets = Object.values(AVAILABLE_DATASETS)
-  const current = selectedDataset ? getDatasetById(selectedDataset) : datasets[0]
+  const current = selectedDataset ? getDatasetById(selectedDataset) || datasets[0] : datasets[0]
+
+  const renderIcon = (dataset) => {
+    const Icon = iconMap[dataset.icon] || Database
+    return <Icon className="w-5 h-5" />
+  }
 
   const handleSelect = (dataset) => {
     onDatasetChange(dataset.id)
@@ -25,12 +37,15 @@ const DatasetSelector = ({ onDatasetChange, selectedDataset, className = '' }) =
           className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg ${current.color} flex items-center justify-center text-white text-xl`}>
-              {current.icon}
+            <div className={`w-10 h-10 rounded-lg ${current.color} flex items-center justify-center text-white`}>
+              {renderIcon(current)}
             </div>
             <div className="text-left">
               <div className="font-medium text-gray-900">{current.name}</div>
               <div className="text-sm text-gray-500">{current.predictionType}</div>
+              {current.id === 'uploaded' && (
+                <div className="text-xs text-primary font-medium">Uploaded CSV active</div>
+              )}
             </div>
           </div>
           <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -44,8 +59,8 @@ const DatasetSelector = ({ onDatasetChange, selectedDataset, className = '' }) =
                 onClick={() => handleSelect(dataset)}
                 className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0"
               >
-                <div className={`w-8 h-8 rounded ${dataset.color} flex items-center justify-center text-white text-sm`}>
-                  {dataset.icon}
+                <div className={`w-8 h-8 rounded ${dataset.color} flex items-center justify-center text-white`}>
+                  {renderIcon(dataset)}
                 </div>
                 <div className="flex-1">
                   <div className="font-medium text-gray-900">{dataset.name}</div>

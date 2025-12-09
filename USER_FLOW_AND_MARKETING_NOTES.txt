@@ -1,0 +1,26 @@
+User flow (demo, small-scale):
+1) Landing/Dashboard: choose sample dataset or upload CSV (date, sku, product, category, qty, price, channel). Dashboard shows revenue, orders, low/out-of-stock counts, top product, and alerts preview.
+2) Inventory: view stock status table with avg daily sales and reorder qty; export reorder plan (CSV/print). Dataset switcher keeps the flow consistent.
+3) Forecasting: select dataset; see AI-generated risks/opportunities/reorder suggestions (demo-cached); refresh if needed; ask AI (demo response stub).
+4) Alerts: see generated alerts (stock risks, opportunities); filter; export CSV/print.
+5) Analytics: view trend and category charts plus quick insights.
+
+Features highlighted for a prospect:
+- Quick start: upload a simple CSV to populate all views; sample datasets preloaded.
+- Stock risk and reorder plan: heuristics compute low/out-of-stock and recommended reorder quantities; exportable.
+- AI insights (demo-safe): cached Gemini-style outputs for risks/opportunities/reorders; refresh button.
+- Alerts center: action-focused alerts derived from data; export options.
+- Lightweight forecasting and what-if narrative (demo) without backend setup.
+
+Required info to onboard a small seller (for real use):
+- Recent sales export (CSV/Excel) with date, sku, product, category, qty, price, channel.
+- Current on-hand stock per SKU (can be included in the same file or as a simple list).
+- Typical supplier lead times and minimum order quantities (optional but improves recommendations).
+- Preferred channels/platforms to reference (Shopee/Lazada/Facebook/etc.).
+- Email/LINE/WhatsApp for sending alerts/reports.
+
+Demo notes to share with the client team:
+- No login/back-end required for demo; runs on sample or uploaded CSV.
+- AI calls are cached demo responses for speed; production would use server-side Gemini with validation.
+- Exports: reorder plan (CSV/print) and alerts (CSV/print) work end-to-end.
+- Dataset switcher shows adaptability; uploading replaces data instantly across pages.

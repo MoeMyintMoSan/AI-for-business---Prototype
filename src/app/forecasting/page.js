@@ -1,36 +1,41 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PageLayout from '../../components/layout/PageLayout'
 import MetricCard from '../../components/ui/MetricCard'
 import DatasetSelector from '../../components/ui/DatasetSelector'
-import GeminiService from '../../utils/geminiService'
+import demoStore from '../../lib/demoStore'
 import { TrendingUp, AlertTriangle, Target, Zap, Bot, MessageSquare } from 'lucide-react'
 
 export default function EnhancedForecastingPage() {
   const [selectedDataset, setSelectedDataset] = useState('ecommerce_sales')
-  const [predictions, setPredictions] = useState([])
+  const [insights, setInsights] = useState(null)
+  const [snapshot, setSnapshot] = useState(demoStore.getSnapshot('electronics'))
   const [isLoading, setIsLoading] = useState(false)
   const [chatQuery, setChatQuery] = useState('')
   const [chatResponse, setChatResponse] = useState('')
   const [showChat, setShowChat] = useState(false)
 
-  // Load predictions when dataset changes
+  const datasets = useMemo(() => demoStore.listDatasets(), [])
+
   useEffect(() => {
-    loadPredictions()
+    setSnapshot(demoStore.getSnapshot(selectedDataset))
+    loadInsights(selectedDataset)
   }, [selectedDataset])
 
-  const loadPredictions = async () => {
+  const loadInsights = async (datasetId) => {
     setIsLoading(true)
     try {
-      const result = await GeminiService.generateDatasetPredictions(selectedDataset, {
-        type: 'business_forecasting',
-        timeFrame: '7 days',
-        metrics: 'Sales, Inventory, Revenue'
+      const res = await fetch('/api/ai/insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ datasetId })
       })
-      setPredictions(result)
+      const data = await res.json()
+      setInsights(data.insights)
     } catch (error) {
-      console.error('Error loading predictions:', error)
+      console.error('Error loading insights', error)
+      setInsights(demoStore.getDemoInsights())
     } finally {
       setIsLoading(false)
     }
@@ -38,19 +43,25 @@ export default function EnhancedForecastingPage() {
 
   const handleChatQuery = async () => {
     if (!chatQuery.trim()) return
-    
     setIsLoading(true)
     try {
-      const response = await GeminiService.generateBusinessInsights(selectedDataset, chatQuery)
-      setChatResponse(response)
+      const res = await fetch('/api/ai/insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ datasetId: selectedDataset, query: chatQuery })
+      })
+      const data = await res.json()
+      setChatResponse(data.answer || 'Demo response unavailable')
       setShowChat(true)
     } catch (error) {
-      console.error('Error getting AI insights:', error)
-      setChatResponse('Sorry, I cannot process your query right now. Please try again later.')
+      setChatResponse('Could not fetch AI answer (demo).')
+      setShowChat(true)
     } finally {
       setIsLoading(false)
     }
   }
+
+  const predictions = insights?.reorders || []
 
   const getPriorityColor = (confidence) => {
     if (confidence >= 85) return 'text-red-600 bg-red-50 border-red-200'
@@ -64,45 +75,29 @@ export default function EnhancedForecastingPage() {
     return 'text-red-600'
   }
 
+  const avgConfidence = insights?.risks?.length
+    ? Math.round(insights.risks.reduce((acc, r) => acc + (r.confidence || 70), 0) / insights.risks.length)
+    : 0
+
   return (
     <PageLayout
       title="AI Forecasting & Predictions"
-      subtitle="Get AI-powered insights and predictions for your business data"
+      subtitle="Demo-safe insights powered by cached AI output"
     >
       {/* Dataset Selection */}
       <div className="mb-6">
-        <DatasetSelector
-          selectedDataset={selectedDataset}
-          onDatasetChange={setSelectedDataset}
-        />
+        <div className="flex items-center justify-between">
+          <DatasetSelector selectedDataset={selectedDataset} onDatasetChange={setSelectedDataset} />
+          <div className="text-sm text-gray-500">Source: demo cache</div>
+        </div>
       </div>
 
       {/* Summary Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <MetricCard
-          title="Active Predictions"
-          value={predictions.length}
-          icon={<Target className="w-6 h-6" />}
-          subtitle={predictions.length > 0 ? `+${predictions.length > 5 ? 15 : predictions.length * 3}% this week` : 'No predictions yet'}
-        />
-        <MetricCard
-          title="Avg Confidence"
-          value={predictions.length > 0 ? `${Math.round(predictions.reduce((acc, p) => acc + p.confidence, 0) / predictions.length)}%` : '0%'}
-          icon={<TrendingUp className="w-6 h-6" />}
-          subtitle="AI prediction accuracy"
-        />
-        <MetricCard
-          title="High Priority"
-          value={predictions.filter(p => p.confidence >= 85).length}
-          icon={<AlertTriangle className="w-6 h-6" />}
-          subtitle="Urgent actions needed"
-        />
-        <MetricCard
-          title="AI Powered"
-          value="Gemini"
-          icon={<Bot className="w-6 h-6" />}
-          subtitle="Google AI Integration"
-        />
+        <MetricCard title="Active Predictions" value={predictions.length} icon={<Target className="w-6 h-6" />} subtitle="Reorder suggestions" />
+        <MetricCard title="Avg Confidence" value={`${avgConfidence || 0}%`} icon={<TrendingUp className="w-6 h-6" />} subtitle="Demo AI confidence" />
+        <MetricCard title="High Priority" value={(insights?.risks?.length || 0).toString()} icon={<AlertTriangle className="w-6 h-6" />} subtitle="Risks detected" />
+        <MetricCard title="Dataset" value={selectedDataset} icon={<Bot className="w-6 h-6" />} subtitle="Demo dataset" />
       </div>
 
       {/* AI Chat Interface */}
@@ -110,15 +105,15 @@ export default function EnhancedForecastingPage() {
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center space-x-2 mb-4">
             <MessageSquare className="w-5 h-5 text-blue-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Ask AI for Business Insights</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Ask AI (demo)</h3>
           </div>
-          
+
           <div className="flex space-x-3">
             <input
               type="text"
               value={chatQuery}
               onChange={(e) => setChatQuery(e.target.value)}
-              placeholder="Ask about your business data... (e.g., 'What should I restock this week?')"
+              placeholder="In demo, responses are cached."
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               onKeyPress={(e) => e.key === 'Enter' && handleChatQuery()}
             />
@@ -154,7 +149,7 @@ export default function EnhancedForecastingPage() {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">AI Predictions & Insights</h3>
             <button
-              onClick={loadPredictions}
+              onClick={() => loadInsights(selectedDataset)}
               disabled={isLoading}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
             >
@@ -168,48 +163,46 @@ export default function EnhancedForecastingPage() {
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Generating AI predictions...</span>
+              <span className="ml-3 text-gray-600">Loading demo insights...</span>
             </div>
           ) : predictions.length > 0 ? (
             <div className="space-y-6">
-              {predictions.map((prediction) => (
-                <div key={prediction.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+              {predictions.map((prediction, idx) => (
+                <div key={idx} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <h4 className="text-lg font-semibold text-gray-900">{prediction.title}</h4>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getPriorityColor(prediction.confidence)}`}>
-                          {prediction.confidence >= 85 ? 'High Priority' : prediction.confidence >= 75 ? 'Medium Priority' : 'Low Priority'}
+                        <h4 className="text-lg font-semibold text-gray-900">{prediction.reason}</h4>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getPriorityColor(85)}`}>
+                          High Priority
                         </span>
                       </div>
-                      <p className="text-gray-700 mb-3">{prediction.prediction}</p>
+                      <p className="text-gray-700 mb-3">Reorder {prediction.qty} units ({prediction.when})</p>
                     </div>
                     <div className="text-right">
-                      <div className={`text-2xl font-bold ${getConfidenceColor(prediction.confidence)}`}>
-                        {prediction.confidence}%
-                      </div>
+                      <div className={`text-2xl font-bold ${getConfidenceColor(85)}`}>85%</div>
                       <div className="text-sm text-gray-500">Confidence</div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <h5 className="font-medium text-gray-900 mb-1">Business Impact</h5>
-                      <p className="text-sm text-gray-700">{prediction.impact}</p>
+                      <h5 className="font-medium text-gray-900 mb-1">SKU</h5>
+                      <p className="text-sm text-gray-700">{prediction.sku}</p>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <h5 className="font-medium text-gray-900 mb-1">Recommended Action</h5>
-                      <p className="text-sm text-gray-700">{prediction.action}</p>
+                      <h5 className="font-medium text-gray-900 mb-1">Action</h5>
+                      <p className="text-sm text-gray-700">Order now to avoid stockout</p>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-4">
                       <h5 className="font-medium text-gray-900 mb-1">Timeline</h5>
-                      <p className="text-sm text-gray-700">{prediction.timeframe}</p>
+                      <p className="text-sm text-gray-700">{prediction.when}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>Dataset: {prediction.dataset}</span>
-                    <span>Generated by AI</span>
+                    <span>Dataset: {selectedDataset}</span>
+                    <span>Generated from demo cache</span>
                   </div>
                 </div>
               ))}
@@ -218,13 +211,13 @@ export default function EnhancedForecastingPage() {
             <div className="text-center py-12">
               <Bot className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Predictions Available</h3>
-              <p className="text-gray-600 mb-4">Select a dataset and click refresh to generate AI predictions</p>
+              <p className="text-gray-600 mb-4">Select a dataset and click refresh to load demo insights</p>
               <button
-                onClick={loadPredictions}
+                onClick={() => loadInsights(selectedDataset)}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2 mx-auto"
               >
                 <Zap className="w-5 h-5" />
-                <span>Generate Predictions</span>
+                <span>Load Insights</span>
               </button>
             </div>
           )}

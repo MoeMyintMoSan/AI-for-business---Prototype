@@ -1,4 +1,5 @@
 import LoadingSpinner from '../ui/LoadingSpinner'
+import { AlertTriangle } from 'lucide-react'
 
 const ChartContainer = ({ 
   title,
@@ -45,7 +46,9 @@ const ChartContainer = ({
         {error && (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="text-danger text-2xl mb-2">⚠️</div>
+              <div className="text-danger text-2xl mb-2 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
               <p className="text-gray-600">{error}</p>
             </div>
           </div>

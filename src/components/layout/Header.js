@@ -1,17 +1,17 @@
 'use client'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, X, BarChart3 } from 'lucide-react'
+import { Menu, X, BarChart3, Package, Bot, Bell, LineChart } from 'lucide-react'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: '📊' },
-    { name: 'Inventory', href: '/inventory', icon: '📦' },
-    { name: 'Forecasting', href: '/forecasting', icon: '🔮' },
-    { name: 'Alerts', href: '/alerts', icon: '🔔' },
-    { name: 'Analytics', href: '/analytics', icon: '📈' },
+    { name: 'Dashboard', href: '/', icon: BarChart3 },
+    { name: 'Inventory', href: '/inventory', icon: Package },
+    { name: 'Forecasting', href: '/forecasting', icon: Bot },
+    { name: 'Alerts', href: '/alerts', icon: Bell },
+    { name: 'Analytics', href: '/analytics', icon: LineChart },
   ]
 
   return (
@@ -34,7 +34,7 @@ const Header = () => {
                 href={item.href}
                 className="flex items-center space-x-1 text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                <span>{item.icon}</span>
+                <item.icon className="w-4 h-4" />
                 <span>{item.name}</span>
               </Link>
             ))}
@@ -69,7 +69,7 @@ const Header = () => {
                   className="flex items-center space-x-2 text-gray-600 hover:text-primary px-3 py-2 rounded-md text-base font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <span>{item.icon}</span>
+                  <item.icon className="w-4 h-4" />
                   <span>{item.name}</span>
                 </Link>
               ))}

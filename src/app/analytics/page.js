@@ -7,7 +7,7 @@ import LineChart from '../../components/charts/LineChart'
 import BarChart from '../../components/charts/BarChart'
 import DonutChart from '../../components/charts/DonutChart'
 import ActionButton from '../../components/ui/ActionButton'
-import { TrendingUp, DollarSign, Package, Users, Download, Calendar } from 'lucide-react'
+import { TrendingUp, DollarSign, Package, Users, Download, Calendar, Lightbulb, Target } from 'lucide-react'
 
 export default function AnalyticsPage() {
   // Mock analytics data
@@ -243,7 +243,7 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-start gap-3">
-              <span className="text-info text-xl">📈</span>
+              <Lightbulb className="w-5 h-5 text-info" />
               <div>
                 <p className="font-medium text-gray-900">Strong Q4 Performance</p>
                 <p className="text-sm text-gray-600">Revenue is up 18.5% compared to last quarter, driven by electronics sales.</p>
@@ -253,7 +253,7 @@ export default function AnalyticsPage() {
           
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-start gap-3">
-              <span className="text-success text-xl">🎯</span>
+              <Target className="w-5 h-5 text-success" />
               <div>
                 <p className="font-medium text-gray-900">Customer Growth</p>
                 <p className="text-sm text-gray-600">New customer acquisition is 12.3% above target for this period.</p>

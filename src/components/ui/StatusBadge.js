@@ -1,3 +1,5 @@
+import { CheckCircle, AlertTriangle, XCircle, Info } from 'lucide-react'
+
 const StatusBadge = ({ 
   status, 
   label, 
@@ -42,21 +44,21 @@ const StatusBadge = ({
       case 'good':
       case 'in-stock':
       case 'high':
-        return '🟢'
+        return <CheckCircle className="w-4 h-4" />
       case 'low':
       case 'warning':
       case 'low-stock':
-        return '🟡'
+        return <AlertTriangle className="w-4 h-4" />
       case 'critical':
       case 'danger':
       case 'out-of-stock':
       case 'out':
-        return '🔴'
+        return <XCircle className="w-4 h-4" />
       case 'info':
       case 'pending':
-        return '🔵'
+        return <Info className="w-4 h-4" />
       default:
-        return '⚫'
+        return <Info className="w-4 h-4" />
     }
   }
 

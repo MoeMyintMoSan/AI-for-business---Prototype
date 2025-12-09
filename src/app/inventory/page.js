@@ -1,72 +1,21 @@
 'use client'
 
+import { useMemo, useState } from 'react'
 import PageLayout from '../../components/layout/PageLayout'
 import MetricCard from '../../components/ui/MetricCard'
 import DataTable from '../../components/ui/DataTable'
 import SearchBar from '../../components/ui/SearchBar'
 import StatusBadge from '../../components/ui/StatusBadge'
 import ActionButton from '../../components/ui/ActionButton'
-import { Package, Plus, Filter } from 'lucide-react'
+import demoStore from '../../lib/demoStore'
+import { Package, Plus, Filter, RefreshCw, Download, CheckCircle, AlertTriangle, OctagonAlert } from 'lucide-react'
+import { exportCSV, printSummary } from '../../utils/exportUtils'
 
 export default function InventoryPage() {
-  // Mock inventory data
-  const inventoryData = [
-    {
-      id: 1,
-      name: "iPhone 13 Clear Case",
-      sku: "IP13-CASE-001",
-      currentStock: 45,
-      minThreshold: 10,
-      status: "good",
-      platform: "Shopee",
-      salesVelocity: "12/week",
-      category: "Electronics"
-    },
-    {
-      id: 2,
-      name: "Wireless Bluetooth Earbuds",
-      sku: "BT-EAR-002",
-      currentStock: 8,
-      minThreshold: 15,
-      status: "low",
-      platform: "Lazada",
-      salesVelocity: "8/week",
-      category: "Electronics"
-    },
-    {
-      id: 3,
-      name: "Samsung Fast Charger",
-      sku: "SAM-CHG-003",
-      currentStock: 0,
-      minThreshold: 5,
-      status: "out",
-      platform: "Shopee",
-      salesVelocity: "15/week",
-      category: "Electronics"
-    },
-    {
-      id: 4,
-      name: "Beauty Face Serum",
-      sku: "BEA-SER-004",
-      currentStock: 32,
-      minThreshold: 10,
-      status: "good",
-      platform: "Facebook",
-      salesVelocity: "6/week",
-      category: "Beauty"
-    },
-    {
-      id: 5,
-      name: "Portable Phone Stand",
-      sku: "PHN-STD-005",
-      currentStock: 7,
-      minThreshold: 12,
-      status: "low",
-      platform: "Lazada",
-      salesVelocity: "4/week",
-      category: "Accessories"
-    }
-  ]
+  const [datasetId, setDatasetId] = useState('electronics')
+  const snapshot = useMemo(() => demoStore.getSnapshot(datasetId), [datasetId])
+  const datasets = demoStore.listDatasets()
+  const inventoryData = snapshot.inventory.items.map((item, idx) => ({ id: idx + 1, ...item }))
 
   const columns = [
     {
@@ -79,104 +28,63 @@ export default function InventoryPage() {
         </div>
       )
     },
-    {
-      key: 'category',
-      label: 'Category'
-    },
-    {
-      key: 'currentStock',
-      label: 'Stock',
-      render: (value) => (
-        <span className="font-medium">{value}</span>
-      )
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      render: (value) => <StatusBadge status={value} />,
-      sortable: false
-    },
-    {
-      key: 'platform',
-      label: 'Platform'
-    },
-    {
-      key: 'salesVelocity',
-      label: 'Sales Velocity'
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (value, row) => (
-        <div className="flex gap-2">
-          <ActionButton variant="outline" size="sm">
-            Edit
-          </ActionButton>
-          {row.status === 'low' || row.status === 'out' ? (
-            <ActionButton variant="warning" size="sm">
-              Reorder
-            </ActionButton>
-          ) : null}
-        </div>
-      ),
-      sortable: false
-    }
+    { key: 'category', label: 'Category' },
+    { key: 'currentStock', label: 'Stock', render: (value) => <span className="font-medium">{value}</span> },
+    { key: 'avgDaily', label: 'Avg Daily' },
+    { key: 'reorderQty', label: 'Reorder Qty' },
+    { key: 'status', label: 'Status', render: (value) => <StatusBadge status={value} />, sortable: false }
   ]
 
-  // Calculate summary stats
-  const totalSKU = inventoryData.length
-  const inStock = inventoryData.filter(item => item.status === 'good').length
-  const lowStock = inventoryData.filter(item => item.status === 'low').length
-  const outOfStock = inventoryData.filter(item => item.status === 'out').length
+  const summary = snapshot.inventory.summary
+  const reorderPlan = snapshot.reorders
+
+  const exportReorderCSV = () => {
+    if (!reorderPlan.length) return
+    exportCSV('reorder_plan.csv', ['sku', 'name', 'reorderQty', 'reason', 'suggestedDate'], reorderPlan)
+  }
+
+  const exportReorderPDF = () => {
+    if (!reorderPlan.length) return
+    const lines = reorderPlan.map((r) => `${r.sku} - ${r.name}: ${r.reorderQty} units (${r.reason}, ${r.suggestedDate})`)
+    printSummary('Reorder Plan', lines)
+  }
 
   return (
-    <PageLayout 
-      title="Inventory Management" 
-      subtitle="Manage your product inventory and stock levels"
+    <PageLayout
+      title="Inventory Management"
+      subtitle="Stock risk and reorder plan from demo data"
     >
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-gray-700">Dataset</label>
+          <select
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            value={datasetId}
+            onChange={(e) => setDatasetId(e.target.value)}
+          >
+            {datasets.map((d) => (
+              <option key={d.id} value={d.id}>{d.name}</option>
+            ))}
+          </select>
+        </div>
+        <button className="flex items-center gap-2 text-sm text-primary" onClick={() => setDatasetId((prev) => prev)}>
+          <RefreshCw className="w-4 h-4" /> Refresh snapshot
+        </button>
+      </div>
+
       {/* Inventory Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <MetricCard
-          title="Total SKUs"
-          value={totalSKU.toString()}
-          subtitle="Active products"
-          icon={<Package size={24} />}
-          iconBgColor="bg-primary"
-        />
-        
-        <MetricCard
-          title="In Stock"
-          value={inStock.toString()}
-          subtitle="Good stock levels"
-          icon="🟢"
-          iconBgColor="bg-success"
-        />
-        
-        <MetricCard
-          title="Low Stock"
-          value={lowStock.toString()}
-          subtitle="Needs attention"
-          icon="🟡"
-          iconBgColor="bg-warning"
-        />
-        
-        <MetricCard
-          title="Out of Stock"
-          value={outOfStock.toString()}
-          subtitle="Immediate action needed"
-          icon="🔴"
-          iconBgColor="bg-danger"
-        />
+        <MetricCard title="Total SKUs" value={summary.total.toString()} subtitle="Active products" icon={<Package size={24} />} iconBgColor="bg-primary" />
+        <MetricCard title="In Stock" value={summary.good.toString()} subtitle="Good cover" icon={<CheckCircle className="w-6 h-6" />} iconBgColor="bg-success" />
+        <MetricCard title="Low Stock" value={summary.low.toString()} subtitle="Below lead-time" icon={<AlertTriangle className="w-6 h-6" />} iconBgColor="bg-warning" />
+        <MetricCard title="Out of Stock" value={summary.out.toString()} subtitle="Needs action" icon={<OctagonAlert className="w-6 h-6" />} iconBgColor="bg-danger" />
       </div>
 
       {/* Search and Filter Bar */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex-1 max-w-md">
-            <SearchBar 
-              placeholder="Search products, SKU, or category..."
-              size="md"
-            />
+            <SearchBar placeholder="Search products, SKU, or category..." size="md" />
           </div>
           <div className="flex gap-3">
             <ActionButton variant="outline" size="md">
@@ -187,17 +95,20 @@ export default function InventoryPage() {
               <Plus size={16} />
               Add Product
             </ActionButton>
+            <ActionButton variant="outline" size="md" onClick={exportReorderCSV}>
+              <Download size={16} />
+              Reorder CSV
+            </ActionButton>
+            <ActionButton variant="outline" size="md" onClick={exportReorderPDF}>
+              <Download size={16} />
+              Reorder PDF
+            </ActionButton>
           </div>
         </div>
       </div>
 
       {/* Inventory Table */}
-      <DataTable
-        columns={columns}
-        data={inventoryData}
-        loading={false}
-        sortable={true}
-      />
+      <DataTable columns={columns} data={inventoryData} loading={false} sortable={true} />
     </PageLayout>
   )
 }
