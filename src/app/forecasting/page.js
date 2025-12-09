@@ -5,31 +5,65 @@ import PageLayout from '../../components/layout/PageLayout'
 import MetricCard from '../../components/ui/MetricCard'
 import DatasetSelector from '../../components/ui/DatasetSelector'
 import demoStore from '../../lib/demoStore'
+import { getAllDatasets } from '../../data/datasets/datasetConfig'
 import { TrendingUp, AlertTriangle, Target, Zap, Bot, MessageSquare } from 'lucide-react'
 
 export default function EnhancedForecastingPage() {
-  const [selectedDataset, setSelectedDataset] = useState('ecommerce_sales')
+  const baseDatasets = useMemo(() => getAllDatasets(), [])
+  const hasUploaded = demoStore.listDatasets().some((d) => d.id === 'uploaded')
+  const datasetOptions = useMemo(() => {
+    const opts = [...baseDatasets]
+    if (hasUploaded) {
+      opts.unshift({
+        id: 'uploaded',
+        name: 'Uploaded CSV',
+        description: 'Uses your latest uploaded file',
+        source: 'User upload',
+        attributes: ['sku', 'product', 'qty', 'date', 'channel'],
+        predictionType: 'Demand & stock insights',
+        icon: 'database',
+        color: 'bg-slate-500',
+        sampleSize: 'Your rows',
+        timeRange: 'From file',
+        confidence: 'Varies by data quality'
+      })
+    }
+    return opts
+  }, [baseDatasets, hasUploaded])
+
+  const [selectedDataset, setSelectedDataset] = useState(datasetOptions[0]?.id || 'ecommerce_sales')
   const [insights, setInsights] = useState(null)
-  const [snapshot, setSnapshot] = useState(demoStore.getSnapshot('electronics'))
+  const [snapshot, setSnapshot] = useState(() => demoStore.getSnapshot('electronics'))
   const [isLoading, setIsLoading] = useState(false)
   const [chatQuery, setChatQuery] = useState('')
   const [chatResponse, setChatResponse] = useState('')
   const [showChat, setShowChat] = useState(false)
 
-  const datasets = useMemo(() => demoStore.listDatasets(), [])
+  const normalizeDatasetId = (id) => {
+    if (id === 'ecommerce_sales' || id === 'inventory_mgmt') return 'electronics'
+    if (id === 'customer_behavior' || id === 'seasonal_trends') return 'beauty'
+    return id || 'electronics'
+  }
 
   useEffect(() => {
-    setSnapshot(demoStore.getSnapshot(selectedDataset))
+    const fallbackId = datasetOptions[0]?.id || 'ecommerce_sales'
+    if (!datasetOptions.find((d) => d.id === selectedDataset)) {
+      setSelectedDataset(fallbackId)
+      return
+    }
+    const normalized = normalizeDatasetId(selectedDataset)
+    setSnapshot(demoStore.getSnapshot(normalized))
     loadInsights(selectedDataset)
-  }, [selectedDataset])
+  }, [selectedDataset, datasetOptions])
 
   const loadInsights = async (datasetId) => {
+    const normalized = normalizeDatasetId(datasetId)
     setIsLoading(true)
     try {
       const res = await fetch('/api/ai/insights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ datasetId })
+        body: JSON.stringify({ datasetId: normalized })
       })
       const data = await res.json()
       setInsights(data.insights)
@@ -48,7 +82,7 @@ export default function EnhancedForecastingPage() {
       const res = await fetch('/api/ai/insights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ datasetId: selectedDataset, query: chatQuery })
+        body: JSON.stringify({ datasetId: normalizeDatasetId(selectedDataset), query: chatQuery })
       })
       const data = await res.json()
       setChatResponse(data.answer || 'Demo response unavailable')
@@ -87,7 +121,11 @@ export default function EnhancedForecastingPage() {
       {/* Dataset Selection */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
-          <DatasetSelector selectedDataset={selectedDataset} onDatasetChange={setSelectedDataset} />
+          <DatasetSelector
+            selectedDataset={selectedDataset}
+            onDatasetChange={setSelectedDataset}
+            datasets={datasetOptions}
+          />
           <div className="text-sm text-gray-500">Source: demo cache</div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown, Database, TrendingUp, Zap, Info, ShoppingCart, Box, Calendar, Users } from 'lucide-react'
-import { AVAILABLE_DATASETS, getDatasetById } from '../../data/datasets/datasetConfig'
+import { AVAILABLE_DATASETS } from '../../data/datasets/datasetConfig'
 
 const iconMap = {
   cart: ShoppingCart,
@@ -11,12 +11,13 @@ const iconMap = {
   users: Users
 }
 
-const DatasetSelector = ({ onDatasetChange, selectedDataset, className = '' }) => {
+const DatasetSelector = ({ onDatasetChange, selectedDataset, datasets: providedDatasets, className = '' }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
 
-  const datasets = Object.values(AVAILABLE_DATASETS)
-  const current = selectedDataset ? getDatasetById(selectedDataset) || datasets[0] : datasets[0]
+  // Prefer datasets passed in from the page so we can include uploaded CSV.
+  const datasets = providedDatasets?.length ? providedDatasets : Object.values(AVAILABLE_DATASETS)
+  const current = datasets.find((d) => d.id === selectedDataset) || datasets[0] || {}
 
   const renderIcon = (dataset) => {
     const Icon = iconMap[dataset.icon] || Database
@@ -64,7 +65,7 @@ const DatasetSelector = ({ onDatasetChange, selectedDataset, className = '' }) =
                 </div>
                 <div className="flex-1">
                   <div className="font-medium text-gray-900">{dataset.name}</div>
-                  <div className="text-xs text-gray-500">{dataset.description}</div>
+                  <div className="text-xs text-gray-500">{dataset.description || dataset.predictionType}</div>
                 </div>
                 {selectedDataset === dataset.id && (
                   <div className="w-2 h-2 bg-primary rounded-full"></div>
@@ -98,15 +99,15 @@ const DatasetSelector = ({ onDatasetChange, selectedDataset, className = '' }) =
           </div>
           <div>
             <span className="text-gray-600">Sample Size:</span>
-            <div className="font-medium text-gray-900">{current.sampleSize}</div>
+            <div className="font-medium text-gray-900">{current.sampleSize || 'Demo scope'}</div>
           </div>
           <div>
             <span className="text-gray-600">Time Range:</span>
-            <div className="font-medium text-gray-900">{current.timeRange}</div>
+            <div className="font-medium text-gray-900">{current.timeRange || 'Recent periods'}</div>
           </div>
           <div>
             <span className="text-gray-600">Confidence:</span>
-            <div className="font-medium text-gray-900">{current.confidence}</div>
+            <div className="font-medium text-gray-900">{current.confidence || 'Demo'}</div>
           </div>
         </div>
 
@@ -115,7 +116,7 @@ const DatasetSelector = ({ onDatasetChange, selectedDataset, className = '' }) =
             <div className="mb-3">
               <span className="text-sm text-gray-600">Key Attributes:</span>
               <div className="flex flex-wrap gap-2 mt-1">
-                {current.attributes.map((attr, index) => (
+                {(current.attributes || []).map((attr, index) => (
                   <span key={index} className="px-2 py-1 bg-white rounded text-xs text-gray-700 border">
                     {attr}
                   </span>
