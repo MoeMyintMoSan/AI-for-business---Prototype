@@ -50,24 +50,24 @@ const DataTable = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-8">
+      <div className="card p-8">
         <LoadingSpinner size="lg" text="Loading data..." />
       </div>
     )
   }
 
   return (
-    <div className={`bg-white rounded-lg shadow overflow-hidden ${className}`}>
+    <div className={`card overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+          <thead style={{ background: 'linear-gradient(90deg, var(--accent-soft), var(--secondary-soft))' }}>
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.key}
                   className={`
-                    px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider
-                    ${sortable && column.sortable !== false ? 'cursor-pointer hover:bg-gray-100' : ''}
+                    px-6 py-3 text-left text-xs font-semibold text-subtle-ink uppercase tracking-wider
+                    ${sortable && column.sortable !== false ? 'cursor-pointer hover:bg-primary-soft' : ''}
                   `}
                   onClick={() => sortable && column.sortable !== false && handleSort(column.key)}
                 >
@@ -79,22 +79,29 @@ const DataTable = ({
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sortedData.map((row, rowIndex) => (
-              <tr key={row.id || rowIndex} className="hover:bg-gray-50">
-                {columns.map((column) => (
-                  <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {column.render ? column.render(row[column.key], row) : row[column.key]}
-                  </td>
-                ))}
-              </tr>
-            ))}
+          <tbody>
+            {sortedData.map((row, rowIndex) => {
+              const stripeColor = rowIndex % 2 === 0 ? 'var(--accent-soft)' : 'var(--secondary-soft)'
+              return (
+                <tr
+                  key={row.id || rowIndex}
+                  className="transition-colors"
+                  style={{ background: stripeColor }}
+                >
+                  {columns.map((column) => (
+                    <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-ink">
+                      {column.render ? column.render(row[column.key], row) : row[column.key]}
+                    </td>
+                  ))}
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
       
       {sortedData.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted">
           No data available
         </div>
       )}

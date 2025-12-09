@@ -14,9 +14,9 @@ const ActionButton = ({
   const getVariantStyles = (variant) => {
     switch (variant) {
       case 'primary':
-        return 'bg-primary text-white hover:bg-primary-dark focus:ring-primary'
+        return 'bg-primary text-white hover:bg-primary-strong focus:ring-primary'
       case 'secondary':
-        return 'bg-primary-light text-white hover:bg-primary focus:ring-primary-light'
+        return 'bg-secondary text-white hover:opacity-90 focus:ring-secondary'
       case 'success':
         return 'bg-success text-white hover:opacity-90 focus:ring-success'
       case 'warning':
@@ -26,7 +26,7 @@ const ActionButton = ({
       case 'outline':
         return 'border border-primary text-primary bg-white hover:bg-primary hover:text-white focus:ring-primary'
       case 'ghost':
-        return 'text-primary hover:bg-primary-light hover:bg-opacity-10 focus:ring-primary'
+        return 'text-primary hover:bg-primary-soft focus:ring-primary'
       default:
         return 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-200'
     }

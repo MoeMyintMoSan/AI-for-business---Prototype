@@ -73,11 +73,11 @@ export default function InventoryPage() {
       </div>
 
       {/* Inventory Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <MetricCard title="Total SKUs" value={summary.total.toString()} subtitle="Active products" icon={<Package size={24} />} iconBgColor="bg-primary" />
-        <MetricCard title="In Stock" value={summary.good.toString()} subtitle="Good cover" icon={<CheckCircle className="w-6 h-6" />} iconBgColor="bg-success" />
-        <MetricCard title="Low Stock" value={summary.low.toString()} subtitle="Below lead-time" icon={<AlertTriangle className="w-6 h-6" />} iconBgColor="bg-warning" />
-        <MetricCard title="Out of Stock" value={summary.out.toString()} subtitle="Needs action" icon={<OctagonAlert className="w-6 h-6" />} iconBgColor="bg-danger" />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        <MetricCard tone="primary" title="Total SKUs" value={summary.total.toString()} subtitle="Active products" icon={<Package size={24} />} />
+        <MetricCard tone="secondary" title="In Stock" value={summary.good.toString()} subtitle="Good cover" icon={<CheckCircle className="w-6 h-6" />} />
+        <MetricCard tone="primary" title="Low Stock" value={summary.low.toString()} subtitle="Below lead-time" icon={<AlertTriangle className="w-6 h-6" />} />
+        <MetricCard tone="secondary" title="Out of Stock" value={summary.out.toString()} subtitle="Needs action" icon={<OctagonAlert className="w-6 h-6" />} />
       </div>
 
       {/* Search and Filter Bar */}

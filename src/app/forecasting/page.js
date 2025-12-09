@@ -131,11 +131,11 @@ export default function EnhancedForecastingPage() {
       </div>
 
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <MetricCard title="Active Predictions" value={predictions.length} icon={<Target className="w-6 h-6" />} subtitle="Reorder suggestions" />
-        <MetricCard title="Avg Confidence" value={`${avgConfidence || 0}%`} icon={<TrendingUp className="w-6 h-6" />} subtitle="Demo AI confidence" />
-        <MetricCard title="High Priority" value={(insights?.risks?.length || 0).toString()} icon={<AlertTriangle className="w-6 h-6" />} subtitle="Risks detected" />
-        <MetricCard title="Dataset" value={selectedDataset} icon={<Bot className="w-6 h-6" />} subtitle="Demo dataset" />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        <MetricCard tone="primary" title="Active Predictions" value={predictions.length} icon={<Target className="w-6 h-6" />} subtitle="Reorder suggestions" />
+        <MetricCard tone="secondary" title="Avg Confidence" value={`${avgConfidence || 0}%`} icon={<TrendingUp className="w-6 h-6" />} subtitle="Demo AI confidence" />
+        <MetricCard tone="primary" title="High Priority" value={(insights?.risks?.length || 0).toString()} icon={<AlertTriangle className="w-6 h-6" />} subtitle="Risks detected" />
+        <MetricCard tone="secondary" title="Dataset" value={selectedDataset} icon={<Bot className="w-6 h-6" />} subtitle="Demo dataset" />
       </div>
 
       {/* AI Chat Interface */}
