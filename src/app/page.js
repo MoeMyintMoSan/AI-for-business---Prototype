@@ -21,11 +21,11 @@ export default function Dashboard() {
       title="Demo Dashboard"
       subtitle="Upload or switch a sample dataset to show immediate value"
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className="bg-white/80 backdrop-blur card border border-subtle shadow-soft p-5 rounded-xl mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">Dataset</label>
+          <label className="text-sm font-semibold text-subtle-ink">Dataset</label>
           <select
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            className="border border-subtle rounded-lg px-3 py-2 text-sm bg-white shadow-sm"
             value={datasetId}
             onChange={(e) => setDatasetId(e.target.value)}
           >
@@ -34,55 +34,55 @@ export default function Dashboard() {
             ))}
           </select>
         </div>
-        <div className="text-sm text-gray-500">Showing snapshot from demo data</div>
+        <div className="text-sm text-muted">Showing snapshot from demo data</div>
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         <MetricCard
           title="Revenue"
           value={`฿${metrics.revenue.toLocaleString()}`}
           subtitle={`${metrics.orders} orders | AOV ฿${metrics.aov.toFixed(0)}`}
           icon={<DollarSign className="w-6 h-6" />}
-          iconBgColor="bg-primary-light"
+          tone="primary"
         />
         <MetricCard
           title="Top Product"
           value={metrics.topProducts[0]?.name || '—'}
           subtitle={`${metrics.topProducts[0]?.sales || 0} units`}
           icon={<TrendingUp className="w-6 h-6" />}
-          iconBgColor="bg-success"
+          tone="secondary"
         />
         <MetricCard
           title="Low Stock"
           value={inventory.summary.low.toString()}
           subtitle="Below lead-time cover"
           icon={<AlertTriangle className="w-6 h-6" />}
-          iconBgColor="bg-warning"
+          tone="primary"
         />
         <MetricCard
           title="Out of Stock"
           value={inventory.summary.out.toString()}
           subtitle="Needs action"
           icon={<OctagonAlert className="w-6 h-6" />}
-          iconBgColor="bg-danger"
+          tone="secondary"
         />
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-        <div className="flex flex-wrap gap-4">
-          <Link href="/inventory" className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors">
+      <div className="card border border-subtle shadow-soft p-6 mb-8">
+        <h3 className="text-xl font-semibold text-ink mb-4">Quick Actions</h3>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/inventory" className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-strong transition-colors shadow-soft">
             Manage Inventory
           </Link>
-          <Link href="/forecasting" className="bg-primary-light text-white px-4 py-2 rounded-lg hover:bg-primary transition-colors">
+          <Link href="/forecasting" className="bg-secondary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-soft">
             View Forecasts
           </Link>
-          <Link href="/alerts" className="bg-warning text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+          <Link href="/alerts" className="bg-warning text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-soft">
             Check Alerts
           </Link>
-          <Link href="/analytics" className="bg-success text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+          <Link href="/analytics" className="bg-success text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-soft">
             View Reports
           </Link>
         </div>

@@ -1,10 +1,12 @@
 'use client'
 import Link from 'next/link'
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Menu, X, BarChart3, Package, Bot, Bell, LineChart } from 'lucide-react'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const pathname = usePathname()
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: BarChart3 },
@@ -16,10 +18,10 @@ const Header = () => {
 
   return (
     <header className="bg-white border-b border-subtle shadow-soft">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-8 lg:px-10 xl:px-12">
+        <div className="flex items-center justify-between gap-3 h-16 flex-wrap">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center min-w-0">
             <Link href="/" className="flex items-center space-x-2">
               <BarChart3 className="h-8 w-8 text-primary" />
               <span className="text-xl font-extrabold text-ink">StockWise AI</span>
@@ -27,17 +29,24 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-1">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="flex items-center space-x-2 text-subtle-ink hover:text-primary px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                <item.icon className="w-4 h-4" />
-                <span>{item.name}</span>
-              </Link>
-            ))}
+          <nav className="hidden md:flex flex-wrap gap-1">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    isActive
+                      ? 'text-primary bg-primary-soft'
+                      : 'text-subtle-ink hover:text-primary hover:bg-primary-soft'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.name}</span>
+                </Link>
+              )
+            })}
           </nav>
 
           {/* User Menu */}
@@ -63,17 +72,24 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden border-t border-subtle pt-4 pb-4 bg-white">
             <nav className="flex flex-col space-y-2">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="flex items-center space-x-2 text-subtle-ink hover:text-primary px-3 py-2 rounded-lg text-base font-medium"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span>{item.name}</span>
-                </Link>
-              ))}
+              {navigation.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-base font-medium transition-colors ${
+                      isActive
+                        ? 'text-primary bg-primary-soft'
+                        : 'text-subtle-ink hover:text-primary hover:bg-primary-soft'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span>{item.name}</span>
+                  </Link>
+                )
+              })}
             </nav>
           </div>
         )}

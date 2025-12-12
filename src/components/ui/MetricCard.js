@@ -24,7 +24,6 @@ const MetricCard = ({
 
   return (
     <div className="relative overflow-hidden card p-6" style={{ background: `linear-gradient(135deg, ${toneStyles.wash}, #ffffff)` }}>
-      <div className="absolute inset-x-0 top-0 h-1" style={{ background: 'linear-gradient(90deg, var(--accent), var(--secondary))' }}></div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex-1">
           <p className="text-sm font-semibold text-subtle-ink mb-1 uppercase tracking-wide">{title}</p>

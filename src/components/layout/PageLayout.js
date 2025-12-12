@@ -5,11 +5,11 @@ const PageLayout = ({ children, title, subtitle }) => {
     <div className="min-h-screen bg-app">
       <Header />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="w-full max-w-screen-xl mx-auto px-4 sm:px-8 lg:px-10 xl:px-12 py-8 sm:py-10 space-y-8">
         {(title || subtitle) && (
-          <div className="mb-8">
+          <div className="space-y-2">
             {title && (
-              <h1 className="text-3xl font-bold text-ink mb-2 tracking-tight">
+              <h1 className="text-4xl sm:text-4xl font-bold text-ink tracking-tight">
                 {title}
               </h1>
             )}
@@ -21,7 +21,7 @@ const PageLayout = ({ children, title, subtitle }) => {
           </div>
         )}
         
-        <div className="space-y-6">
+        <div className="space-y-8">
           {children}
         </div>
       </main>
